@@ -12,6 +12,8 @@ jobs:
     env:
       OPENSTATUS_API_KEY: ${{ secrets.OPENSTATUS_API_KEY }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
 
     steps:
       - name: ⬇️ Checkout repo
@@ -26,11 +28,8 @@ jobs:
         run: bun install
 
       - name: 🔥 Deploy
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          packageManager: bun
-          command: deploy --minify src/index.ts
+        run: bun run deploy
+
 
       - name: 🧪 Test
         run: bun test
@@ -38,8 +37,5 @@ jobs:
 
       - name: 🚀 Rollback
         if: failure() && steps.test.outcome == 'failure'
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: rollback
-          packageManager: bun
+        run: bun run rollback
+
