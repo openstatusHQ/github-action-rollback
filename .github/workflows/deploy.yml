@@ -1,0 +1,40 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare Workers 🔥
+    runs-on: ubuntu-latest
+    env:
+      OPENSTATUS_API_KEY: ${{ secrets.OPENSTATUS_API_KEY }}
+
+    steps:
+
+      - name: 🔥 Install bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📥 Download deps
+        run: bun install
+
+      - name: 🔥 Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          packageManager: bun
+
+      - name: 🧪 Test
+        run: pnpm test
+
+      - name: 🚀 Rollback
+        if: failure()
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: rollback
+          packageManager: bun

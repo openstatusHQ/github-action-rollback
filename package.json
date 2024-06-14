@@ -1,0 +1,23 @@
+{
+  "name": "github-action-rollback",
+  "scripts": {
+    "dev": "wrangler dev src/index.ts",
+    "deploy": "wrangler deploy --minify src/index.ts",
+    "rollback": "wrangler rollback --message 'Integration test failed'",
+  },
+  "dependencies": {
+    "hono": "4.4.6",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20240605.0",
+    "@types/bun": "1.1.4",
+    "vitest": "1.6.0",
+    "wrangler": "3.60.3"
+  },
+  "module": "index.ts",
+  "type": "module",
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
