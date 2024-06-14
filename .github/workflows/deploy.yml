@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OPENSTATUS_API_KEY: ${{ secrets.OPENSTATUS_API_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
     steps:
       - name: ⬇️ Checkout repo
@@ -29,12 +30,14 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           packageManager: bun
+          command: deploy --minify src/index.ts
 
       - name: 🧪 Test
-        run: pnpm test
+        run: bun test
+        id: test
 
       - name: 🚀 Rollback
-        if: failure()
+        if: failure() && steps.test.outcome == 'failure'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
