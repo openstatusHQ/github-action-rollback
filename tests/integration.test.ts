@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 
 import { z } from "zod";
- const schema = z.object({
+const schema = z.object({
   id: z.number(),
   raw: z.array(
     z.object({
@@ -14,7 +14,7 @@ import { z } from "zod";
       firstByteStart: z.number(),
       firstByteDone: z.number(),
       transferStart: z.number(),
-      transferDone: z.number()
+      transferDone: z.number(),
     })
   ),
   response: z.object({
@@ -30,7 +30,7 @@ import { z } from "zod";
       Nel: z.string(),
       "Report-To": z.string(),
       Server: z.string(),
-      Vary: z.string()
+      Vary: z.string(),
     }),
     timing: z.object({
       dnsStart: z.number(),
@@ -42,9 +42,9 @@ import { z } from "zod";
       firstByteStart: z.number(),
       firstByteDone: z.number(),
       transferStart: z.number(),
-      transferDone: z.number()
+      transferDone: z.number(),
     }),
-    region: z.string()
+    region: z.string(),
   }),
   aggregated: z.object({
     dns: z.object({
@@ -53,7 +53,7 @@ import { z } from "zod";
       p95: z.number(),
       p99: z.number(),
       min: z.number(),
-      max: z.number()
+      max: z.number(),
     }),
     connect: z.object({
       p50: z.number(),
@@ -61,7 +61,7 @@ import { z } from "zod";
       p95: z.number(),
       p99: z.number(),
       min: z.number(),
-      max: z.number()
+      max: z.number(),
     }),
     tls: z.object({
       p50: z.number(),
@@ -69,7 +69,7 @@ import { z } from "zod";
       p95: z.number(),
       p99: z.number(),
       min: z.number(),
-      max: z.number()
+      max: z.number(),
     }),
     firstByte: z.object({
       p50: z.number(),
@@ -77,7 +77,7 @@ import { z } from "zod";
       p95: z.number(),
       p99: z.number(),
       min: z.number(),
-      max: z.number()
+      max: z.number(),
     }),
     transfer: z.object({
       p50: z.number(),
@@ -85,7 +85,7 @@ import { z } from "zod";
       p95: z.number(),
       p99: z.number(),
       min: z.number(),
-      max: z.number()
+      max: z.number(),
     }),
     latency: z.object({
       p50: z.number(),
@@ -93,24 +93,29 @@ import { z } from "zod";
       p95: z.number(),
       p99: z.number(),
       min: z.number(),
-      max: z.number()
-    })
-  })
-})
+      max: z.number(),
+    }),
+  }),
+});
 
 test("should fail if slow", async () => {
+
+
+  // Let's warm our endpoint
+  await fetch("https://github-action-rollback.thibaultleouay.workers.dev/");
+  // Run the test
+
   const options = {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "x-openstatus-key": process.env.OPENSTATUS_API_KEY || "",
     },
-    body: '{"url":"https://github-action-rollback.thibaultleouay.workers.dev/","method":"GET","regions":["ams","iad","gru"],"runCount":2,"aggregated":true}',
+    body: '{"url":"https://github-action-rollback.thibaultleouay.workers.dev/","method":"GET","regions":["ams","iad","gru"],"runCount":5,"aggregated":true}',
   };
 
   const data = await fetch("https://api.openstatus.dev/v1/check", options);
   const json = await data.json();
-  // console.log(JSON.stringify(json));
-   const result = schema.parse(json);
-   expect(result.aggregated.firstByte.p75 < 1000).toBe(true);
+  const result = schema.parse(json);
+  expect(result.aggregated.firstByte.p75 < 1000).toBe(true);
 });
